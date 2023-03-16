@@ -1,3 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Spaces of App-->
+    <dimen name="space_8dp">8dp</dimen>
+    <dimen name="space_10dp">10dp</dimen>
+    <dimen name="space_16dp">16dp</dimen>
+    <dimen name="space_20dp">20dp</dimen>
+
+    <!--Text size-->
+    <dimen name="text_heading">24sp</dimen>
+    <dimen name="text_title">20sp</dimen>
+    <dimen name="text_subject16sp">16sp</dimen>
+    <dimen name="text_medium14sp">14sp</dimen>
+    <dimen name="text_regular14sp">14sp</dimen>
+    <dimen name="text_regular12sp">12sp</dimen>
+    <dimen name="text_minicaps">10sp</dimen>
+    <dimen name="text_buttons">14sp</dimen>
+
+    <!--Sizes-->
+    <dimen name="extended_fab_normal_height_size">40dp</dimen>
+    <dimen name="extended_fab_normal_width_size">97dp</dimen>
+    <dimen name="extended_fab_mini_height_size">32dp</dimen>
+    <dimen name="extended_fab_mini_width_size">97dp</dimen>
 </resources>
