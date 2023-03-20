@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">WeatherApp</string>
+    <!--Check location app-->
+    <string name="message_check_location_is_disabled">Your location provider is turned off. Please turn it on</string>
+    <string name="message_check_location_is_enabled">Your location provider is already ON</string>
+    <string name="message_permission_location_denied">You have denied location permission. Please enable them as it is mandatory for the app to work</string>
+
+    <!--Rationale Dialog - Alert Dialog-->
+    <string name="rationale_dialog_message">It looks like you have turned off permissions required for this feature. It can be enabled under Application Settings</string>
+    <string name="rationale_dialog_positive_button_text">GO TO SETTINGS</string>
+    <string name="rationale_dialog_negative_button_text">CANCEL</string>
+
 </resources>
