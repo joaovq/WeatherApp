@@ -13,6 +13,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import br.com.joaovitorqueiroz.weatherapp.util.Constants
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         super.onRestart()
         checkLocationUserEnabled()
     }
+
     private fun checkLocationUserEnabled(): String {
         return if (!isLocationEnabled()) {
             showToastWithText(getString(R.string.message_check_location_is_disabled))
@@ -106,7 +108,7 @@ class MainActivity : AppCompatActivity() {
     private fun requestLocationData() {
         val mLocationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            1000,
+            10000,
         ).build()
 
         mFusedLocationProviderClient.requestLocationUpdates(
@@ -114,6 +116,14 @@ class MainActivity : AppCompatActivity() {
             mLocationCallback,
             Looper.getMainLooper(),
         )
+    }
+
+    private fun getLocationWeatherDetails() {
+        if (Constants.isNetworkAvailable(applicationContext)) {
+            showToastWithText(getString(R.string.message_internet_connection_active))
+        } else {
+            showToastWithText(getString(R.string.message_no_internet_connection))
+        }
     }
 
     private fun showRationalDialogForPermissionsSettings(message: String) {
@@ -147,9 +157,8 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG_CURRENT_LATITUDE, "$latitude")
                 val longitude = safeLocation.longitude
                 Log.i(TAG_CURRENT_LONGITUDE, "$longitude")
+                getLocationWeatherDetails()
             }
-
-            super.onLocationResult(locationResult)
         }
     }
 
