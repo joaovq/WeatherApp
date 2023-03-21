@@ -49,6 +49,8 @@ dependencies {
     def constraint_lt_version = "2.1.4"
     def play_services_location_version = "21.0.1"
     def dexter_version = "6.2.3"
+    def retrofit_version = "2.9.0"
+    def gson_version = "2.10.1"
 
     implementation "androidx.core:core-ktx:$ktx_version"
     implementation "androidx.appcompat:appcompat:$app_compat_version"
@@ -56,6 +58,10 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraint_lt_version"
     implementation "com.google.android.gms:play-services-location:$play_services_location_version"
     implementation "com.karumi:dexter:$dexter_version"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    implementation "com.google.code.gson:gson:$gson_version"
+
 
     def junit_version = "4.13.2"
     def ext_junit_version = "1.1.5"
