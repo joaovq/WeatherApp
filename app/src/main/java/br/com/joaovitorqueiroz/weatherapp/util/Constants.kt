@@ -10,11 +10,11 @@ object Constants {
         var result = false
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val networkCapabilities = connectivityManager.activeNetwork ?: return false
             val activityNetwork =
                 connectivityManager.getNetworkCapabilities(networkCapabilities) ?: return false
-            result = when {
+            when {
                 activityNetwork.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
                 activityNetwork.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
                 activityNetwork.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
@@ -22,7 +22,7 @@ object Constants {
             }
         } else {
             val networkInfo = connectivityManager.activeNetworkInfo
-            result = networkInfo != null && networkInfo.isConnectedOrConnecting
+            networkInfo != null && networkInfo.isConnectedOrConnecting
         }
         return result
     }
