@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
                 val response =
                     service.getWeather(latitude, longitude, Constants.METRIC_UNIT, openWeatherKey)
                 response.body()?.let { safeResponse ->
-                    Log.e("Message",response.message())
+                    Log.e("Message", response.message())
                     Log.e("Weather Response", safeResponse.toString())
                 }
             }
