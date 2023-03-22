@@ -10,12 +10,14 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import br.com.joaovitorqueiroz.weatherapp.core.network.OpenWeatherService
 import br.com.joaovitorqueiroz.weatherapp.core.network.factory.openWeatherKey
+import br.com.joaovitorqueiroz.weatherapp.databinding.ActivityMainBinding
 import br.com.joaovitorqueiroz.weatherapp.util.Constants
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -34,11 +36,22 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
+    private val binding: ActivityMainBinding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         checkLocationUserEnabled()
+        AnimationUtils.loadAnimation(
+            applicationContext,
+            com.karumi.dexter.R.anim.abc_slide_in_bottom,
+        ).also { animation ->
+            animation.duration = 1000
+            binding.tvHelloWorld.startAnimation(animation)
+        }
     }
 
     override fun onRestart() {
