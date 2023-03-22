@@ -1,6 +1,7 @@
 package br.com.joaovitorqueiroz.weatherapp
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.location.Location
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
+    private lateinit var mProgressDialog: Dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -138,6 +140,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getLocationWeatherDetails(latitude: Double, longitude: Double) {
         if (Constants.isNetworkAvailable(applicationContext)) {
+            showCustomDialog()
             val service = OpenWeatherService.service
             lifecycleScope.launch(Dispatchers.IO) {
                 val response =
@@ -146,6 +149,7 @@ class MainActivity : AppCompatActivity() {
                     Log.e("Message", response.message())
                     Log.e("Weather Response", safeResponse.toString())
                 }
+                hideCustomDialog()
             }
         } else {
             showToastWithText(getString(R.string.message_no_internet_connection))
@@ -173,6 +177,16 @@ class MainActivity : AppCompatActivity() {
             ) { dialog, _ ->
                 dialog.dismiss()
             }.show()
+    }
+
+    private fun showCustomDialog() {
+        mProgressDialog = Dialog(this)
+        mProgressDialog.setContentView(R.layout.dialog_custom_progress)
+        mProgressDialog.show()
+    }
+
+    private fun hideCustomDialog() {
+        mProgressDialog.dismiss()
     }
 
     private val mLocationCallback = object : LocationCallback() {

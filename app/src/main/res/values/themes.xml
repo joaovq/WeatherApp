@@ -13,4 +13,19 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+    <style name="Text.Medium.Black" parent="TextAppearance.AppCompat.Medium">
+        <item name="android:textSize">@dimen/text_medium14sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="Text.Subject" parent="TextAppearance.AppCompat.Subhead">
+        <item name="android:textSize">@dimen/text_subject16sp</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+    <style name="Text.Title" parent="TextAppearance.AppCompat.Title">
+        <item name="android:textSize">@dimen/text_title</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textStyle">normal</item>
+    </style>
 </resources>
