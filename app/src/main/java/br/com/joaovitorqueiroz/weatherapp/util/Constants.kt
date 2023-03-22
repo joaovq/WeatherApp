@@ -6,6 +6,8 @@ import android.net.NetworkCapabilities
 import android.os.Build
 
 object Constants {
+
+    const val METRIC_UNIT = "metric"
     fun isNetworkAvailable(context: Context): Boolean {
         var result = false
         val connectivityManager =

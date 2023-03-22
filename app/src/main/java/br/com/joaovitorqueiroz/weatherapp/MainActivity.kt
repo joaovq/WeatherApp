@@ -13,6 +13,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import br.com.joaovitorqueiroz.weatherapp.core.network.OpenWeatherService
+import br.com.joaovitorqueiroz.weatherapp.core.network.factory.openWeatherKey
 import br.com.joaovitorqueiroz.weatherapp.util.Constants
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -25,6 +28,8 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -118,9 +123,17 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun getLocationWeatherDetails() {
+    private fun getLocationWeatherDetails(latitude: Double, longitude: Double) {
         if (Constants.isNetworkAvailable(applicationContext)) {
-            showToastWithText(getString(R.string.message_internet_connection_active))
+            val service = OpenWeatherService.service
+            lifecycleScope.launch(Dispatchers.IO) {
+                val response =
+                    service.getWeather(latitude, longitude, Constants.METRIC_UNIT, openWeatherKey)
+                response.body()?.let { safeResponse ->
+                    Log.e("Message",response.message())
+                    Log.e("Weather Response", safeResponse.toString())
+                }
+            }
         } else {
             showToastWithText(getString(R.string.message_no_internet_connection))
         }
@@ -157,7 +170,7 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG_CURRENT_LATITUDE, "$latitude")
                 val longitude = safeLocation.longitude
                 Log.i(TAG_CURRENT_LONGITUDE, "$longitude")
-                getLocationWeatherDetails()
+                getLocationWeatherDetails(latitude, longitude)
             }
         }
     }

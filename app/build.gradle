@@ -3,6 +3,10 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file("local.properties").newDataInputStream())
+def apiKey = properties.getProperty("OPEN_WEATHER_KEY")
+
 android {
     namespace 'br.com.joaovitorqueiroz.weatherapp'
     compileSdk 33
@@ -15,6 +19,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "OPEN_WEATHER", apiKey)
     }
 
     buildTypes {
