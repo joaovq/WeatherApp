@@ -12,5 +12,7 @@
     <string name="rationale_dialog_positive_button_text">GO TO SETTINGS</string>
     <string name="rationale_dialog_negative_button_text">CANCEL</string>
     <string name="text_please_wait_dialog_progress">Please wait…</string>
+    <string name="image_contentDescription">Climate identificator</string>
+    <string name="miles_per_hour">miles/hour</string>
 
 </resources>

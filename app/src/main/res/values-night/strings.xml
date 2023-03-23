@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="text_please_wait_dialog_progress">Please wait…</string>
+    <string name="image_contentDescription">Climate identificator</string>
+    <string name="miles_per_hour">miles/hour</string>
 </resources>
