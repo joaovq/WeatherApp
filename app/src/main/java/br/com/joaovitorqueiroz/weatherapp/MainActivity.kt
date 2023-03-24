@@ -1,11 +1,13 @@
 package br.com.joaovitorqueiroz.weatherapp
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
@@ -13,27 +15,44 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import br.com.joaovitorqueiroz.weatherapp.util.Constants
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
+import androidx.lifecycle.lifecycleScope
+import br.com.joaovitorqueiroz.weatherapp.core.network.OpenWeatherService
+import br.com.joaovitorqueiroz.weatherapp.core.network.WeatherService
+import br.com.joaovitorqueiroz.weatherapp.core.network.factory.UrlFactory
+import br.com.joaovitorqueiroz.weatherapp.core.network.factory.openWeatherKey
+import br.com.joaovitorqueiroz.weatherapp.databinding.ActivityMainBinding
+import br.com.joaovitorqueiroz.weatherapp.models.WeatherResponse
+import br.com.joaovitorqueiroz.weatherapp.util.DatePattern
+import br.com.joaovitorqueiroz.weatherapp.util.NetworkConnection
+import br.com.joaovitorqueiroz.weatherapp.util.extension.startAnimationDefault
+import br.com.joaovitorqueiroz.weatherapp.util.extension.unixTimeFormat
+import com.bumptech.glide.Glide
+import com.google.android.gms.location.*
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
+    private val binding: ActivityMainBinding by lazy {
+        ActivityMainBinding.inflate(layoutInflater)
+    }
+    private lateinit var mProgressDialog: Dialog
+    private lateinit var service: WeatherService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+        service = OpenWeatherService.service
         checkLocationUserEnabled()
+        startAnimations()
     }
 
     override fun onRestart() {
@@ -108,7 +127,7 @@ class MainActivity : AppCompatActivity() {
     private fun requestLocationData() {
         val mLocationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            10000,
+            100000,
         ).build()
 
         mFusedLocationProviderClient.requestLocationUpdates(
@@ -118,12 +137,92 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun getLocationWeatherDetails() {
-        if (Constants.isNetworkAvailable(applicationContext)) {
-            showToastWithText(getString(R.string.message_internet_connection_active))
+    private fun startAnimations() {
+        binding.llMainScreen.startAnimationDefault(applicationContext)
+    }
+
+    private fun getLocationWeatherDetails(latitude: Double, longitude: Double) {
+        if (NetworkConnection.isNetworkAvailable(applicationContext)) {
+            showCustomDialog()
+            lifecycleScope.launch(Dispatchers.IO) {
+                val response =
+                    service.getWeather(
+                        latitude,
+                        longitude,
+                        NetworkConnection.METRIC_UNIT,
+                        openWeatherKey,
+                    )
+                response.body()?.let { safeResponse ->
+                    Log.e("Message", response.message())
+                    Log.e("Weather Response", safeResponse.toString())
+                    runOnUiThread {
+                        setDetailsInView(safeResponse)
+                    }
+                }
+                hideCustomDialog()
+            }
         } else {
             showToastWithText(getString(R.string.message_no_internet_connection))
         }
+    }
+
+    private fun setDetailsInView(safeResponse: WeatherResponse) {
+        safeResponse.weather[0].apply {
+            binding.cvWeather.setTextMain(main)
+            binding.cvWeather.setTextMainDescription(description)
+        }
+        safeResponse.main.apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                val unit = application.resources.configuration.locales
+                binding.cvHumidity.setTextMain(
+                    getString(R.string.text_template_actual_temp, temp, getUnit(unit.toString())),
+                )
+                binding.cvHumidity.setTextMainDescription(
+                    getString(R.string.text_template_humidity, humidity),
+                )
+            }
+            binding.cvMinMax.setTextMain(getString(R.string.text_template_temp_min, tempMin))
+            binding.cvMinMax.setTextMainDescription(
+                getString(
+                    R.string.text_template_temp_max,
+                    tempMax,
+                ),
+            )
+        }
+        with(safeResponse.sys) {
+            val sunrise: Int = this.sunrise
+            val sunset: Int = this.sunset
+            binding.layoutSunsetSunrise.apply {
+                tvSunriseTime.text = sunrise.toLong().unixTimeFormat(DatePattern.TIME_AM_PM.value)
+                tvSunsetTime.text = sunset.toLong().unixTimeFormat(DatePattern.TIME_AM_PM.value)
+            }
+        }
+
+        binding.cvSpeedWind.setTextMain(safeResponse.wind.speed.toString())
+        binding.layoutCountry.tvName.text = safeResponse.name
+        binding.layoutCountry.tvCountry.text = safeResponse.sys.country
+
+        loadImageWeather(safeResponse)
+    }
+
+    private fun getUnit(unit: String): String {
+        var value = "ºC"
+        if ("US" == value || "LR" == value || "MM" == value) {
+            value = "ºF"
+        }
+        return value
+    }
+
+    private fun loadImageWeather(safeResponse: WeatherResponse) {
+        val requestManagerGlide = Glide
+            .with(applicationContext)
+
+        requestManagerGlide
+            .load(
+                "${UrlFactory.ICON_OPEN_WEATHER_URL.value}${safeResponse.weather[0].icon}.png",
+            )
+            .placeholder(R.drawable.loading_placeholder_image)
+            .into(binding.cvWeather.getImageWeather())
     }
 
     private fun showRationalDialogForPermissionsSettings(message: String) {
@@ -149,6 +248,18 @@ class MainActivity : AppCompatActivity() {
             }.show()
     }
 
+    private fun showCustomDialog() {
+        mProgressDialog = Dialog(this@MainActivity)
+        mProgressDialog.apply {
+            setContentView(R.layout.dialog_custom_progress)
+            show()
+        }
+    }
+
+    private fun hideCustomDialog() {
+        mProgressDialog.dismiss()
+    }
+
     private val mLocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val mLastLocation: Location? = locationResult.lastLocation
@@ -157,7 +268,7 @@ class MainActivity : AppCompatActivity() {
                 Log.i(TAG_CURRENT_LATITUDE, "$latitude")
                 val longitude = safeLocation.longitude
                 Log.i(TAG_CURRENT_LONGITUDE, "$longitude")
-                getLocationWeatherDetails()
+                getLocationWeatherDetails(latitude, longitude)
             }
         }
     }

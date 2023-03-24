@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="WeatherCardView">
+        <attr name="weather_text" format="string"/>
+        <attr name="description_text" format="string"/>
+        <attr name="src_image" format="reference|integer"/>
+    </declare-styleable>
+</resources>
