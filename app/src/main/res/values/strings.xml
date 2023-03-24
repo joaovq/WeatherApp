@@ -15,4 +15,9 @@
     <string name="image_contentDescription">Climate identificator</string>
     <string name="miles_per_hour">miles/hour</string>
 
+    <!--Detail View-->
+    <string name="text_template_temp_min">%.2f min</string>
+    <string name="text_template_temp_max">%.2f max</string>
+    <string name="text_template_humidity">%d per cent</string>
+    <string name="text_template_actual_temp">%.2f %s</string>
 </resources>

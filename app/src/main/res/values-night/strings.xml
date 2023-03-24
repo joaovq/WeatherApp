@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Rationale Dialog - Alert Dialog-->
+    <string name="rationale_dialog_message">It looks like you have turned off permissions required for this feature. It can be enabled under Application Settings</string>
+    <string name="rationale_dialog_positive_button_text">GO TO SETTINGS</string>
+    <string name="rationale_dialog_negative_button_text">CANCEL</string>
     <string name="text_please_wait_dialog_progress">Please wait…</string>
     <string name="image_contentDescription">Climate identificator</string>
     <string name="miles_per_hour">miles/hour</string>
+
+    <!--Detail View-->
+    <string name="text_template_temp_min">%.2f min</string>
+    <string name="text_template_temp_max">%.2f max</string>
+    <string name="text_template_humidity">%d per cent</string>
+    <string name="text_template_actual_temp">%.2f %s</string>
 </resources>

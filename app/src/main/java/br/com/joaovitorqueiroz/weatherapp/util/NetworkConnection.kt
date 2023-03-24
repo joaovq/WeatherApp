@@ -5,11 +5,11 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 
-object Constants {
+object NetworkConnection {
 
     const val METRIC_UNIT = "metric"
     fun isNetworkAvailable(context: Context): Boolean {
-        var result = false
+        val result: Boolean
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
