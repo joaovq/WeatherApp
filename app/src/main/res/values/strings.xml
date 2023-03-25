@@ -20,4 +20,24 @@
     <string name="text_template_temp_max">%.2f max</string>
     <string name="text_template_humidity">%d per cent</string>
     <string name="text_template_actual_temp">%.2f %s</string>
+    <string name="action_menu_refresh">Refresh</string>
+    <string name="action_menu_settings">Settings</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="title_toolbar_settings">Settings</string>
+    <string name="dark_theme_header">Dark Theme</string>
 </resources>

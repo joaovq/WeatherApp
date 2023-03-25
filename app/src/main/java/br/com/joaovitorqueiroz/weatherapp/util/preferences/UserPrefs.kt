@@ -17,6 +17,6 @@ class UserPrefs(context: Context) {
 
     companion object {
         const val USER_PREFERENCES_NAME = "user preferences"
-        const val IS_DARK_PREFERENCE = "is dark"
+        const val IS_DARK_PREFERENCE = "is_dark_theme"
     }
 }

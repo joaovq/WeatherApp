@@ -12,10 +12,13 @@ import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.Menu
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import br.com.joaovitorqueiroz.weatherapp.core.network.OpenWeatherService
 import br.com.joaovitorqueiroz.weatherapp.core.network.WeatherService
 import br.com.joaovitorqueiroz.weatherapp.core.network.factory.UrlFactory
@@ -24,8 +27,10 @@ import br.com.joaovitorqueiroz.weatherapp.databinding.ActivityMainBinding
 import br.com.joaovitorqueiroz.weatherapp.models.WeatherResponse
 import br.com.joaovitorqueiroz.weatherapp.util.DatePattern
 import br.com.joaovitorqueiroz.weatherapp.util.NetworkConnection
-import br.com.joaovitorqueiroz.weatherapp.util.extension.startAnimationDefault
+import br.com.joaovitorqueiroz.weatherapp.util.extension.isNightModeSystemDefault
+import br.com.joaovitorqueiroz.weatherapp.util.extension.startAnimationFromId
 import br.com.joaovitorqueiroz.weatherapp.util.extension.unixTimeFormat
+import br.com.joaovitorqueiroz.weatherapp.util.preferences.UserPrefs
 import com.bumptech.glide.Glide
 import com.google.android.gms.location.*
 import com.karumi.dexter.Dexter
@@ -33,9 +38,9 @@ import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -51,13 +56,47 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         service = OpenWeatherService.service
+        applyNightModePreference()
+        setUpToolbar()
         checkLocationUserEnabled()
         startAnimations()
+        setListenersOfView()
     }
 
-    override fun onRestart() {
-        super.onRestart()
-        checkLocationUserEnabled()
+    private fun applyNightModePreference() {
+        val preferences =
+            PreferenceManager.getDefaultSharedPreferences(this)
+        val isNightMode =
+            preferences.getBoolean(UserPrefs.IS_DARK_PREFERENCE, this.isNightModeSystemDefault())
+        if (isNightMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            delegate.applyDayNight()
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            delegate.applyDayNight()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.toolbar_menu, menu)
+        return true
+    }
+
+    private fun setUpToolbar() {
+        setSupportActionBar(binding.mainToolbar)
+        binding.mainToolbar.setOnMenuItemClickListener { itemMenu ->
+            when (itemMenu.itemId) {
+                R.id.item_settings -> {
+                    startActivity(Intent(applicationContext, SettingsActivity::class.java))
+                    true
+                }
+                R.id.item_refresh -> {
+                    requestLocationData()
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     private fun checkLocationUserEnabled(): String {
@@ -84,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(
             applicationContext,
             text,
-            Toast.LENGTH_SHORT,
+            Toast.LENGTH_SHORT
         ).show()
     }
 
@@ -104,10 +143,10 @@ class MainActivity : AppCompatActivity() {
 
             override fun onPermissionRationaleShouldBeShown(
                 p0: MutableList<PermissionRequest>?,
-                p1: PermissionToken?,
+                p1: PermissionToken?
             ) {
                 showRationalDialogForPermissionsSettings(
-                    getString(R.string.rationale_dialog_message),
+                    getString(R.string.rationale_dialog_message)
                 )
             }
         }
@@ -116,7 +155,7 @@ class MainActivity : AppCompatActivity() {
             .withContext(applicationContext)
             .withPermissions(
                 android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
             )
             .withListener(locationPermissionsListener)
             .onSameThread()
@@ -127,22 +166,25 @@ class MainActivity : AppCompatActivity() {
     private fun requestLocationData() {
         val mLocationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            100000,
+            100000
         ).build()
 
         mFusedLocationProviderClient.requestLocationUpdates(
             mLocationRequest,
             mLocationCallback,
-            Looper.getMainLooper(),
+            Looper.getMainLooper()
         )
     }
 
     private fun startAnimations() {
-        binding.llMainScreen.startAnimationDefault(applicationContext)
+        binding.llMainScreen.startAnimationFromId(applicationContext)
+    }
+
+    private fun setListenersOfView() {
     }
 
     private fun getLocationWeatherDetails(latitude: Double, longitude: Double) {
-        if (NetworkConnection.isNetworkAvailable(applicationContext)) {
+        if (NetworkConnection.isNetworkAvailable(this)) {
             showCustomDialog()
             lifecycleScope.launch(Dispatchers.IO) {
                 val response =
@@ -150,7 +192,7 @@ class MainActivity : AppCompatActivity() {
                         latitude,
                         longitude,
                         NetworkConnection.METRIC_UNIT,
-                        openWeatherKey,
+                        openWeatherKey
                     )
                 response.body()?.let { safeResponse ->
                     Log.e("Message", response.message())
@@ -175,18 +217,18 @@ class MainActivity : AppCompatActivity() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 val unit = application.resources.configuration.locales
                 binding.cvHumidity.setTextMain(
-                    getString(R.string.text_template_actual_temp, temp, getUnit(unit.toString())),
+                    getString(R.string.text_template_actual_temp, temp, getUnit(unit.toString()))
                 )
                 binding.cvHumidity.setTextMainDescription(
-                    getString(R.string.text_template_humidity, humidity),
+                    getString(R.string.text_template_humidity, humidity)
                 )
             }
             binding.cvMinMax.setTextMain(getString(R.string.text_template_temp_min, tempMin))
             binding.cvMinMax.setTextMainDescription(
                 getString(
                     R.string.text_template_temp_max,
-                    tempMax,
-                ),
+                    tempMax
+                )
             )
         }
         with(safeResponse.sys) {
@@ -219,7 +261,7 @@ class MainActivity : AppCompatActivity() {
 
         requestManagerGlide
             .load(
-                "${UrlFactory.ICON_OPEN_WEATHER_URL.value}${safeResponse.weather[0].icon}.png",
+                "${UrlFactory.ICON_OPEN_WEATHER_URL.value}${safeResponse.weather[0].icon}.png"
             )
             .placeholder(R.drawable.loading_placeholder_image)
             .into(binding.cvWeather.getImageWeather())
@@ -242,7 +284,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             .setNegativeButton(
-                getString(R.string.rationale_dialog_negative_button_text),
+                getString(R.string.rationale_dialog_negative_button_text)
             ) { dialog, _ ->
                 dialog.dismiss()
             }.show()

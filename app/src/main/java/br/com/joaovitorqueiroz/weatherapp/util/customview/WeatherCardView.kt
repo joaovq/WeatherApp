@@ -15,12 +15,13 @@ interface IWeatherCardView {
     fun setTextMainDescription(value: String)
     fun setImageDrawableMain(@DrawableRes resDrawable: Int)
     fun getImageWeather(): ImageView
+    fun onClickTextDescription()
 }
 
 class WeatherCardView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
+    defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr), IWeatherCardView {
 
     private lateinit var ivMain: ImageView
@@ -45,6 +46,7 @@ class WeatherCardView @JvmOverloads constructor(
         data.getDrawable(R.styleable.WeatherCardView_src_image)?.let { safeDrawable ->
             ivMain.setImageDrawable(safeDrawable)
         }
+        onClickTextDescription()
         data.recycle()
     }
 
@@ -61,4 +63,14 @@ class WeatherCardView @JvmOverloads constructor(
     }
 
     override fun getImageWeather(): ImageView = ivMain
+    override fun onClickTextDescription() {
+        tvDescriptionMain.apply {
+            setOnClickListener {
+                when (this.lineCount) {
+                    1 -> this.maxLines = Integer.MAX_VALUE
+                    else -> this.maxLines = 1
+                }
+            }
+        }
+    }
 }
