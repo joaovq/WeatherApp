@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -41,6 +40,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
@@ -195,8 +195,8 @@ class MainActivity : AppCompatActivity() {
                         openWeatherKey
                     )
                 response.body()?.let { safeResponse ->
-                    Log.e("Message", response.message())
-                    Log.e("Weather Response", safeResponse.toString())
+                    Timber.e("Message", response.message())
+                    Timber.e("Weather Response", safeResponse.toString())
                     runOnUiThread {
                         setDetailsInView(safeResponse)
                     }
@@ -307,9 +307,9 @@ class MainActivity : AppCompatActivity() {
             val mLastLocation: Location? = locationResult.lastLocation
             mLastLocation?.let { safeLocation ->
                 val latitude = safeLocation.latitude
-                Log.i(TAG_CURRENT_LATITUDE, "$latitude")
+                Timber.i(TAG_CURRENT_LATITUDE, "$latitude")
                 val longitude = safeLocation.longitude
-                Log.i(TAG_CURRENT_LONGITUDE, "$longitude")
+                Timber.i(TAG_CURRENT_LONGITUDE, "$longitude")
                 getLocationWeatherDetails(latitude, longitude)
             }
         }

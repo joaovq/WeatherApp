@@ -2,7 +2,6 @@ package br.com.joaovitorqueiroz.weatherapp
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
@@ -17,6 +16,7 @@ import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
 import br.com.joaovitorqueiroz.weatherapp.databinding.SettingsActivityBinding
 import br.com.joaovitorqueiroz.weatherapp.util.extension.isNightModeSystemDefault
+import timber.log.Timber
 
 private const val TITLE_TAG = "settingsActivityTitle"
 
@@ -100,7 +100,7 @@ class SettingsActivity :
             val preferenceManager = PreferenceManager.getDefaultSharedPreferences(requireContext())
             val isNightMode = context?.isNightModeSystemDefault()
             isDarkTheme = preferenceManager.getBoolean("is_dark_theme", isNightMode!!)
-            Log.e("Dark theme", isDarkTheme.toString())
+            Timber.e("Dark theme", isDarkTheme.toString())
             checkIsDarkTheme(isDarkTheme!!)
             setListeners(preferenceManager)
         }
