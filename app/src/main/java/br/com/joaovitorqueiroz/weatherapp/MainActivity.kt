@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.SharedPreferences
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
@@ -11,12 +12,12 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import android.view.Menu
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import br.com.joaovitorqueiroz.weatherapp.core.network.OpenWeatherService
@@ -32,7 +33,13 @@ import br.com.joaovitorqueiroz.weatherapp.util.extension.startAnimationFromId
 import br.com.joaovitorqueiroz.weatherapp.util.extension.unixTimeFormat
 import br.com.joaovitorqueiroz.weatherapp.util.preferences.UserPrefs
 import com.bumptech.glide.Glide
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.gson.Gson
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -41,6 +48,7 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
 
@@ -50,12 +58,15 @@ class MainActivity : AppCompatActivity() {
     }
     private lateinit var mProgressDialog: Dialog
     private lateinit var service: WeatherService
+    private lateinit var preferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
         service = OpenWeatherService.service
+        preferences = getSharedPreferences(Constants.PREFERENCE_NAME, MODE_PRIVATE)
+        setDetailsInView()
         applyNightModePreference()
         setUpToolbar()
         checkLocationUserEnabled()
@@ -195,10 +206,14 @@ class MainActivity : AppCompatActivity() {
                         openWeatherKey
                     )
                 response.body()?.let { safeResponse ->
-                    Log.e("Message", response.message())
-                    Log.e("Weather Response", safeResponse.toString())
+                    Timber.e("Message", response.message())
+                    Timber.e("Weather Response", safeResponse.toString())
+                    preferences.edit {
+                        val data = Gson().toJson(safeResponse)
+                        putString(Constants.WEATHER_RESPONSE_DATA, data)
+                    }
                     runOnUiThread {
-                        setDetailsInView(safeResponse)
+                        setDetailsInView()
                     }
                 }
                 hideCustomDialog()
@@ -208,48 +223,57 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setDetailsInView(safeResponse: WeatherResponse) {
-        safeResponse.weather[0].apply {
-            binding.cvWeather.setTextMain(main)
-            binding.cvWeather.setTextMainDescription(description)
-        }
-        safeResponse.main.apply {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                val unit = application.resources.configuration.locales
-                binding.cvHumidity.setTextMain(
-                    getString(R.string.text_template_actual_temp, temp, getUnit(unit.toString()))
-                )
-                binding.cvHumidity.setTextMainDescription(
-                    getString(R.string.text_template_humidity, humidity)
+    private fun setDetailsInView() {
+        val weatherResponseData = preferences.getString(Constants.WEATHER_RESPONSE_DATA, "")
+        if (!weatherResponseData.isNullOrEmpty()) {
+            val safeResponse = Gson().fromJson(weatherResponseData, WeatherResponse::class.java)
+            safeResponse.weather[0].apply {
+                binding.cvWeather.setTextMain(main)
+                binding.cvWeather.setTextMainDescription(description)
+            }
+            safeResponse.main.apply {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    val unit = application.resources.configuration.locales
+                    binding.cvHumidity.setTextMain(
+                        getString(
+                            R.string.text_template_actual_temp,
+                            temp,
+                            getUnit(unit.toString())
+                        )
+                    )
+                    binding.cvHumidity.setTextMainDescription(
+                        getString(R.string.text_template_humidity, humidity)
+                    )
+                }
+                binding.cvMinMax.setTextMain(getString(R.string.text_template_temp_min, tempMin))
+                binding.cvMinMax.setTextMainDescription(
+                    getString(
+                        R.string.text_template_temp_max,
+                        tempMax
+                    )
                 )
             }
-            binding.cvMinMax.setTextMain(getString(R.string.text_template_temp_min, tempMin))
-            binding.cvMinMax.setTextMainDescription(
-                getString(
-                    R.string.text_template_temp_max,
-                    tempMax
-                )
-            )
-        }
-        with(safeResponse.sys) {
-            val sunrise: Int = this.sunrise
-            val sunset: Int = this.sunset
-            binding.layoutSunsetSunrise.apply {
-                tvSunriseTime.text = sunrise.toLong().unixTimeFormat(DatePattern.TIME_AM_PM.value)
-                tvSunsetTime.text = sunset.toLong().unixTimeFormat(DatePattern.TIME_AM_PM.value)
+            with(safeResponse.sys) {
+                val sunrise: Int = this.sunrise
+                val sunset: Int = this.sunset
+                binding.layoutSunsetSunrise.apply {
+                    tvSunriseTime.text =
+                        sunrise.toLong().unixTimeFormat(DatePattern.TIME_AM_PM.value)
+                    tvSunsetTime.text = sunset.toLong().unixTimeFormat(DatePattern.TIME_AM_PM.value)
+                }
             }
+
+            binding.cvSpeedWind.setTextMain(safeResponse.wind.speed.toString())
+            binding.layoutCountry.tvName.text = safeResponse.name
+            binding.layoutCountry.tvCountry.text = safeResponse.sys.country
+
+            loadImageWeather(safeResponse)
         }
-
-        binding.cvSpeedWind.setTextMain(safeResponse.wind.speed.toString())
-        binding.layoutCountry.tvName.text = safeResponse.name
-        binding.layoutCountry.tvCountry.text = safeResponse.sys.country
-
-        loadImageWeather(safeResponse)
     }
 
-    private fun getUnit(unit: String): String {
+    private fun getUnit(unit: String = "US"): String {
         var value = "ºC"
-        if ("US" == value || "LR" == value || "MM" == value) {
+        if ("US" == unit || "LR" == unit || "MM" == unit) {
             value = "ºF"
         }
         return value
@@ -307,9 +331,9 @@ class MainActivity : AppCompatActivity() {
             val mLastLocation: Location? = locationResult.lastLocation
             mLastLocation?.let { safeLocation ->
                 val latitude = safeLocation.latitude
-                Log.i(TAG_CURRENT_LATITUDE, "$latitude")
+                Timber.i(TAG_CURRENT_LATITUDE, "$latitude")
                 val longitude = safeLocation.longitude
-                Log.i(TAG_CURRENT_LONGITUDE, "$longitude")
+                Timber.i(TAG_CURRENT_LONGITUDE, "$longitude")
                 getLocationWeatherDetails(latitude, longitude)
             }
         }
