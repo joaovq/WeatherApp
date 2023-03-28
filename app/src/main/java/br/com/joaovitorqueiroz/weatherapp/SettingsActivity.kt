@@ -16,7 +16,6 @@ import androidx.preference.PreferenceManager
 import androidx.preference.SwitchPreferenceCompat
 import br.com.joaovitorqueiroz.weatherapp.databinding.SettingsActivityBinding
 import br.com.joaovitorqueiroz.weatherapp.util.extension.isNightModeSystemDefault
-import timber.log.Timber
 
 private const val TITLE_TAG = "settingsActivityTitle"
 
@@ -93,44 +92,44 @@ class SettingsActivity :
 
         private var isDarkTheme: Boolean? = null
         private var isDark: SwitchPreferenceCompat? = null
+        private lateinit var preferenceManager: SharedPreferences
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.header_preferences, rootKey)
-            isDark = findPreference("is_dark_theme")
-            val preferenceManager = PreferenceManager.getDefaultSharedPreferences(requireContext())
-            val isNightMode = context?.isNightModeSystemDefault()
-            isDarkTheme = preferenceManager.getBoolean("is_dark_theme", isNightMode!!)
-            Timber.e("Dark theme", isDarkTheme.toString())
-            checkIsDarkTheme(isDarkTheme!!)
-            setListeners(preferenceManager)
+            isDark = findPreference(IS_DARK_THEME_PREFERENCE_NAME)
+            preferenceManager = PreferenceManager.getDefaultSharedPreferences(requireContext())
+            val isNightMode = requireContext().isNightModeSystemDefault()
+            isDarkTheme = preferenceManager.getBoolean(IS_DARK_THEME_PREFERENCE_NAME, isNightMode)
+            setDarkTheme(isDarkTheme!!)
+            setListeners()
         }
 
-        private fun setListeners(
-            preferenceManager: SharedPreferences
-        ) {
+        private fun setListeners() {
             isDark?.setOnPreferenceChangeListener { _, newValue ->
                 isDarkTheme = newValue as Boolean
                 isDarkTheme?.let { safeFlag ->
                     preferenceManager.edit {
-                        putBoolean("is_dark_theme", safeFlag)
+                        putBoolean(IS_DARK_THEME_PREFERENCE_NAME, safeFlag)
                     }
-                    checkIsDarkTheme(safeFlag)
+                    setDarkTheme(safeFlag)
                     return@setOnPreferenceChangeListener true
                 }
                 false
             }
         }
 
-        private fun checkIsDarkTheme(
+        private fun setDarkTheme(
             flag: Boolean
         ) {
             if (flag) {
-                isDark?.isChecked = true
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)
             } else {
-                isDark?.isChecked = false
                 AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO)
             }
+        }
+
+        companion object {
+            const val IS_DARK_THEME_PREFERENCE_NAME = "is_dark_theme"
         }
     }
 
