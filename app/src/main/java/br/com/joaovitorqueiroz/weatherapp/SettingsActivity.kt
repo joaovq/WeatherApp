@@ -74,7 +74,7 @@ class SettingsActivity :
             pref.fragment!!
         ).apply {
             arguments = args
-            caller.setFragmentResultListener(requestKey = "request key") { requestKey, bundle ->
+            caller.setFragmentResultListener(requestKey = "request key") { _, _ ->
             }
             caller.setFragmentResult("request key", bundleOf("request" to "dsad"))
             /*setTargetFragment(caller, 0)*/

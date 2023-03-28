@@ -272,7 +272,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getUnit(unit: String = "US"): String {
-        var value = "°C"
+        var value = "ºC"
         if ("US" == unit || "LR" == unit || "MM" == unit) {
             value = "ºF"
         }
