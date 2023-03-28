@@ -33,17 +33,22 @@ import br.com.joaovitorqueiroz.weatherapp.util.extension.startAnimationFromId
 import br.com.joaovitorqueiroz.weatherapp.util.extension.unixTimeFormat
 import br.com.joaovitorqueiroz.weatherapp.util.preferences.UserPrefs
 import com.bumptech.glide.Glide
-import com.google.android.gms.location.*
+import com.google.android.gms.location.Priority
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -266,9 +271,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getUnit(unit: String): String {
-        var value = "ºC"
-        if ("US" == value || "LR" == value || "MM" == value) {
+    private fun getUnit(unit: String = "US"): String {
+        var value = "°C"
+        if ("US" == unit || "LR" == unit || "MM" == unit) {
             value = "ºF"
         }
         return value
