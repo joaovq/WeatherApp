@@ -1,3 +1,43 @@
 <resources>
     <string name="app_name">WeatherApp</string>
+    <!--Check location app and Network-->
+    <string name="message_check_location_is_disabled">Your location provider is turned off. Please turn it on</string>
+    <string name="message_check_location_is_enabled">Your location provider is already ON</string>
+    <string name="message_permission_location_denied">You have denied location permission. Please enable them as it is mandatory for the app to work</string>
+    <string name="message_internet_connection_active">You have connected to the internet. Now you can make an call with API</string>
+    <string name="message_no_internet_connection">No internet connection available.</string>
+
+    <!--Rationale Dialog - Alert Dialog-->
+    <string name="rationale_dialog_message">It looks like you have turned off permissions required for this feature. It can be enabled under Application Settings</string>
+    <string name="rationale_dialog_positive_button_text">GO TO SETTINGS</string>
+    <string name="rationale_dialog_negative_button_text">CANCEL</string>
+    <string name="text_please_wait_dialog_progress">Please wait…</string>
+    <string name="image_contentDescription">Climate identificator</string>
+    <string name="miles_per_hour">miles/hour</string>
+
+    <!--Detail View-->
+    <string name="text_template_temp_min">%.2f min</string>
+    <string name="text_template_temp_max">%.2f max</string>
+    <string name="text_template_humidity">%d per cent</string>
+    <string name="text_template_actual_temp">%.2f %s</string>
+    <string name="action_menu_refresh">Refresh</string>
+    <string name="action_menu_settings">Settings</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="title_toolbar_settings">Settings</string>
+    <string name="dark_theme_header">Dark Theme</string>
 </resources>

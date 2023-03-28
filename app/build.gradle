@@ -3,6 +3,10 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+Properties properties = new Properties()
+properties.load(project.rootProject.file("local.properties").newDataInputStream())
+def apiKey = properties.getProperty("OPEN_WEATHER_KEY")
+
 android {
     namespace 'br.com.joaovitorqueiroz.weatherapp'
     compileSdk 33
@@ -15,6 +19,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "OPEN_WEATHER", apiKey)
     }
 
     buildTypes {
@@ -30,15 +35,45 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+    buildFeatures{
+        viewBinding true
+        dataBinding true
+    }
+    dataBinding{
+        enabled = true
+    }
 }
 
 dependencies {
+    implementation "androidx.preference:preference:$preference_version"
+    implementation "com.jakewharton.timber:timber:$timber_version"
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.8.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation "androidx.core:core-ktx:$ktx_version"
+    implementation "androidx.appcompat:appcompat:$app_compat_version"
+    implementation "com.google.android.material:material:$material_version"
+    implementation "androidx.constraintlayout:constraintlayout:$constraint_lt_version"
+    //    Location Api
+    implementation "com.google.android.gms:play-services-location:$play_services_location_version"
+    //    Dexter
+    implementation "com.karumi:dexter:$dexter_version"
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofit_version"
+    implementation "com.google.code.gson:gson:$gson_version"
+//    Glide
+    implementation "com.github.bumptech.glide:glide:$glide_version"
+    // Skip this if you don't want to use integration libraries or configure Glide.
+    annotationProcessor "com.github.bumptech.glide:compiler:$glide_version"
+    implementation "androidx.activity:activity-ktx:1.7.0"
+    implementation "androidx.fragment:fragment-ktx:1.5.6"
+
+
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$ext_junit_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
+    testImplementation "org.mockito:mockito-core:$mockito_version"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_kotlin_version"
 }
